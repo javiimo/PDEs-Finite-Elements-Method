@@ -1,0 +1,21 @@
+real h = 1.0/8;  // Adjust h as needed
+int n = int(1/h);  // Number of divisions on one side of the square
+
+mesh Th;
+for (int j = 0; j < n; j=j+2) {
+    for (int i = 0; i < n; i=i+2) {
+        real x0 = i * h;
+        real y0 = j * h;
+        real x1 = i * h + 2*h;
+        real y1 = j * h + 2*h;
+        // cout << i << ", " << j << endl;
+        // cout << "(" << x0 << ", " << y0 << ")" << endl;
+        // cout << "(" << x1 << ", " << y1 << ")" << endl;
+
+        mesh Thaux = square(2, 2, [x0+(x1-x0)*x, y0+(y1-y0)*y], flags=3);
+        // plot(Th, wait=true);
+        
+        Th = Th + Thaux;
+        plot(Th, wait=true);}}
+
+plot(Th, wait=true);

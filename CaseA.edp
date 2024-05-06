@@ -1,0 +1,69 @@
+border bb(t = 0, 1) { x = t; y = 0; label = 1; }
+border br(t = 0, 1) { x = 1; y = t; label = 1; }
+border bt(t = 0, 1) { x = 1-t; y = 1; label = 1; }
+border bl(t = 0, 1) { x = 0; y = 1-t; label = 1; }
+
+// Case a
+func fa = - 4;
+func ga = (x - 3/2)^2 + (y +1)^2;
+// Exact solution case a
+func uexa = (x - 3/2)^2 + (y +1)^2;
+func dxuexa = 2*(x - 3/2);
+func dyuexa = 2*(y +1);
+
+//Create an empty txt file to output the errors and convergence rate
+ofstream file("CaseA_Report.txt");
+int n, m = 4, i;
+real[int] errInf(m+1), errL2(m+1), errL2Grad(m+1);
+for (i = 0; i <= m; i++) {
+    n = 4 * 2^i;  
+    mesh Th = square(n, n);
+    fespace Vh(Th, P1);
+    Vh u, v;
+    // Interpolating the exact solution onto the FE space:
+    Vh uexaInterp;
+    uexaInterp = uexa; 
+    //Solve
+    solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
+                        - int2d(Th)(fa * v) + on(1, u=ga);
+    
+
+    //Compute the errors
+    errL2[i] = sqrt(int2d(Th)((u - uexaInterp)^2));
+    errL2Grad[i] = sqrt(int2d(Th)((dx(u) - 
+                   dx(uexaInterp))^2 + (dy(u) - dy(uexaInterp))^2));
+    // Compute the difference array
+    real[int] diff = u[] - uexaInterp[];
+    // Compute the L-infinity norm of the difference
+    errInf[i] = diff.linfty;
+
+
+    cout << "errInf = " << errInf[i] << endl;
+    cout << "errL2 = " << errL2[i] << endl;
+    cout << "errL2Grad = " << errL2Grad[i] << endl;
+    
+    //Write errors to report file
+    file << "FOR h = " << "1/" << n << endl;
+    file << "errInf = " << errInf[i] << endl;
+    file << "errL2 = " << errL2[i] << endl;
+    file << "errL2Grad = " << errL2Grad[i] << endl;
+    file << endl;
+
+    //Plots
+    plot(Th, wait=true);
+    plot(u, wait=true);
+    if (i == m)
+        cout << "PLOTING 3D" << endl;
+        plot(Th, u, dim=3, fill=1, WindowIndex=1);
+}
+real rateL2 = log(errL2[m-1] / errL2[m]) / log(2.0);
+real rateInf = log(errInf[m-1] / errInf[m]) / log(2.0);
+real rateL2Grad = log(errL2Grad[m-1] / errL2Grad[m]) / log(2.0);
+cout << "convergence rate Inf = " << rateInf << endl;
+cout << "convergence rate L2 = " << rateL2 << endl; 
+cout << "convergence rate L2Grad = " << rateL2Grad << endl; 
+
+//Write convergence rate to report file
+file << "convergence rate Inf = " << rateInf << endl;
+file << "convergence rate L2 = " << rateL2 << endl; 
+file << "convergence rate L2Grad = " << rateL2Grad << endl; 

@@ -49,7 +49,15 @@ for (i = 0; i <= m; i++) {
     solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
                         - int2d(Th)(fb * v) + on(1, u=gb);
     
-    
+    // Extract the stiffness matrix and F vector
+    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) 
+                    + on(1, u=gb);
+    matrix A = a(Vh, Vh, tgv=-2); // Stiffness matrix
+    // Save the matrix and vector to files
+    ofstream Afile("A_matrix_CaseB2_"+i+".dat");
+    Afile << A << endl; // Writing matrix to file
+
+
     //Compute the errors
     errL2[i] = sqrt(int2d(Th)((u - uexaInterp)^2));
     errL2Grad[i] = sqrt(int2d(Th)((dx(u) - 

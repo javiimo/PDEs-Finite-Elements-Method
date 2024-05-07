@@ -11,9 +11,7 @@ ofstream file("CaseA_Report.txt");
 int n, m = 4, i;
 real[int] errInf(m+1), errL2(m+1), errL2Grad(m+1);
 
-//Initialize the stiffness matrix and load vector of the system:
-// matrix A;
-// real[int] b;
+
 for (i = 0; i <= m; i++) {
     n = 4 * 2^i;  
     int[int] labs = [1, 1, 1, 1];
@@ -28,16 +26,19 @@ for (i = 0; i <= m; i++) {
                         - int2d(Th)(fa * v) + on(1, u=ga);
     
 
-    // // Extract the stiffness matrix and load vector
-    // varf vA(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
-    // varf vL(unused,v) = - int2d(Th)(fa * v) + on(1, u=ga)
-    // A = Poisson.varf.Vh.Vh(u, v).A; // Stiffness matrix
-    // b = Poisson.varf.Vh(0, v).b; // Load vector
-    // // Save the matrix and vector to files
-    // ofstream Afile("A_matrix_CaseA_"+i+".txt");
-    // ofstream bfile("b_vector_CaseA_"+i+".txt");
-    // Afile << A << endl; // Writing matrix to file
-    // bfile << b << endl; // Writing vector to file
+    // Extract the stiffness matrix and F vector
+    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
+                    + on(1, u=ga);
+    matrix A = a(Vh, Vh, tgv=-2); // Stiffness matrix
+    // varf l(unused,v) = - int2d(Th)(fa * v) 
+    //                     + on(1, unused=ga);
+    // Vh F;
+    // F[] = l(0,Vh); 
+    // Save the matrix and vector to files
+    ofstream Afile("A_matrix_CaseA_"+i+".dat");
+    Afile << A << endl; // Writing matrix to file
+    // ofstream Ffile("F_vector_CaseA_"+i+".dat");
+    // Ffile << F << endl; // Writing vector to file
 
     //Compute the errors
     errL2[i] = sqrt(int2d(Th)((u - uexaInterp)^2));

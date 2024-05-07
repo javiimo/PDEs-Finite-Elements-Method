@@ -12,7 +12,7 @@ for (int j = 0; j < n; j=j+2) {
         // cout << "(" << x0 << ", " << y0 << ")" << endl;
         // cout << "(" << x1 << ", " << y1 << ")" << endl;
 
-        mesh Thaux = square(2, 2, [x0+(x1-x0)*x, y0+(y1-y0)*y], flags=3);
+        mesh Thaux = square(2, 2, [x0+(x1-x0)*x, y0+(y1-y0)*y]);
         // plot(Th, wait=true);
         
         Th = Th + Thaux;

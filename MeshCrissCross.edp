@@ -1,0 +1,42 @@
+int n, m = 4;
+for (int i = 0; i <= m; i++) {
+    n = 4 * 2^i;
+    real h = 1.0 / n;
+    mesh Th;
+    for (int j = 0; j < n; j += 2) {
+        for (int k = 0; k < n; k += 2) {
+            real x0 = k * h;
+            real y0 = j * h;
+            real x1 = k * h + 2 * h;
+            real y1 = j * h + 2 * h;
+            int[int] labs(4);
+            
+            // Define labels based on location of borders
+            labs = [0, 0, 0, 0];  // default interior
+            if (j == 0) labs[0] = 1;  // bottom edge
+            if (j == n-2) labs[2] = 1;  // top edge
+            if (k == 0) labs[3] = 1;  // left edge
+            if (k == n-2) labs[1] = 1;  // right edge
+
+            mesh Thaux = square(2, 2, [x0 + (x1 - x0) * x, y0 + (y1 - y0) * y], flags=3, label=labs);
+            Th = Th + Thaux;
+        }
+    }
+    //Visualizing the parts labeled
+    int[int] lab = labels(Th); 
+    varf onG(u, v) = on(lab, u = label); 
+    fespace Vh(Th, P1); 
+    Vh u; u[] = onG(0, Vh, tgv = -1); 
+
+    // Print values at each vertex
+    cout << "FOR h=" << h <<endl;
+    for (int i = 0; i < Th.nv; ++i) {  // Th.nv gives the number of vertices
+        cout << "Vertex " << i << " (" << Th(i).x << ", " << Th(i).y << ") has u = " << u[](i) << endl;
+    }
+    //Plotting mesh
+    plot(Th, wait=true);
+    //Plotting labels (0=inside, 1=external border)
+    //plot(u, dim=3, wait=true); //3D
+    plot(u, fill = true, value = true, wait = true); //2D
+}
+

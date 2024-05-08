@@ -63,7 +63,7 @@ for (i = 0; i <= m; i++) {
 
     //Plots
     plot(Th, wait=true);
-    plot(u, wait=true);
+    plot(u,fill=true, wait=true, value=true);
     if (i == m)
         cout << "PLOTING 3D" << endl;
         plot(Th, u, dim=3, fill=1, WindowIndex=1);

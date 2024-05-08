@@ -3,6 +3,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spla
 import os
 import glob
+import matplotlib.pyplot as plt
 
 '''
 Key Notes:
@@ -12,6 +13,32 @@ Condition Number: Calculating the exact condition number for large sparse matric
 
 Sparse Matrix Conversion: When necessary, converting a sparse matrix to a dense format (todense()) is used, but keep in mind that this can be very memory-intensive for large matrices.
 '''
+
+
+def visualize_sparse_matrix(sparse_matrix, filename):
+    """
+    Visualize a sparse matrix with an option to manually proceed to the next visualization.
+
+    Args:
+    sparse_matrix (sp.coo_matrix): A scipy COO sparse matrix.
+    filename (str): The name of the file from which the matrix was read.
+
+    Returns:
+    A plot showing the non-zero entries of the sparse matrix, waits for user input to close.
+    """
+    fig, ax = plt.subplots(figsize=(10, 10))  # Create a figure and an axes.
+    # Scatter plot of non-zero entries.
+    ax.scatter(sparse_matrix.col, sparse_matrix.row, c=sparse_matrix.data, marker='s', s=100, cmap='viridis')
+    ax.set_xlim(-1, sparse_matrix.shape[1])  # Set limits for x-axis.
+    ax.set_ylim(-1, sparse_matrix.shape[0])  # Set limits for y-axis.
+    ax.invert_yaxis()  # Invert the y-axis to match matrix indexing.
+    ax.set_aspect('equal')  # Set aspect of the plot to be equal.
+    ax.set_title(f'Non-zero entries of the Sparse Matrix from {filename}')  # Use the filename in the title.
+    ax.set_xlabel('Column Index')
+    ax.set_ylabel('Row Index')
+    plt.colorbar(ax.collections[0], ax=ax, orientation='vertical', label='Value')  # Add a colorbar.
+    plt.show(block=True)  # Display the plot and block execution until closed manually.
+
 
 def read_matrix_from_file_and_create_sparse_matrix(filename):
     rows, cols, vals = [], [], []
@@ -48,10 +75,11 @@ def read_matrix_from_file_and_create_sparse_matrix(filename):
     return matrix
 
 
-def compute_cond_num(filename):
+def compute_cond_num(filename, display=False):
     print(filename)
     sparse_matrix = read_matrix_from_file_and_create_sparse_matrix(filename)
-    
+    if display:
+        visualize_sparse_matrix(sparse_matrix, filename)
     # Compute the condition number using an approximation or conversion to dense matrix if feasible
     try:
         # Attempt to compute the condition number directly (feasible for smaller matrices)
@@ -68,5 +96,5 @@ def compute_cond_num(filename):
 files = glob.glob('*.dat')
 # Loop through the found files and delete them
 for file in files:
-    if int(file[-5])<3:
-        compute_cond_num(file)
+    if int(file[-5])<4:
+        compute_cond_num(file, display=True)

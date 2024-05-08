@@ -61,7 +61,7 @@ for (i = 0; i <= m; i++) {
     file << endl;
 
     plot(Th, wait=true);
-    plot(u, wait=true, dim=3, fill=1);
+    plot(u, wait=true, fill=1, value=1);
     if (i == m)
         cout << "PLOTING 3D" << endl;
         plot(Th, u, dim=3, fill=1, WindowIndex=1);

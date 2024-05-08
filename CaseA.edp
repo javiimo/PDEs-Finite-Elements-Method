@@ -18,28 +18,59 @@ for (i = 0; i <= m; i++) {
     mesh Th = square(n, n, label=labs);
     fespace Vh(Th, P1);
     Vh u, v;
+    //Solve
+    // solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
+    //                    - int2d(Th)(fa * v) + on(1, u=ga);
+    
+
+    // Solve algebraically with symmetric stiffness matrix
+    // Set Dirichlet BC
+    Vh uDh = ga;
+    
+    // Set bilinear and linear forms
+    // varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
+    //                 + on(1, u=ga);
+    // varf l(u,v) = int2d(Th)(fa * v); 
+    // Assemble the matrix and right-hand side vector
+    // matrix A = a(Vh, Vh, tgv=-2.); // Bilinear form matrix
+    //real[int] b = l(0,Vh); // Linear form vector
+
+    // Modify b to account for the boundary conditions
+    //real[int] bBoundary = A * uDh[];
+    //b = b - bBoundary;
+    //b = bBoundary - b; //seems better
+    //b = b + bBoundary; //Maybe better?
+
+    // Segun prueba2
+    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) + int2d(Th)(fa * v) + on(1, u=ga);
+    Vh uA; // uA: Asymmetric, u:Symmetric
+    matrix MA = a(Vh,Vh,tgv=-1);
+    real[int] rhsA = a(0,Vh,tgv=-1.);
+
+    varf dirichletBC(u,v) = on(1, u=ga);
+    real[int] bc = dirichletBC(0,Vh,tgv=-1);
+    matrix MS = a(Vh,Vh,tgv=-2.);
+    matrix MD = MS-MA;
+    real[int] rhsS = MD*bc;
+    rhsS += rhsA;
+    u[] = MS^-1*rhsS;
+
+
+    // // Solve the system
+    // set(A, solver = UMFPACK);
+    // u[] = A^-1*b; //return solution as real[int] array
+
+
+    // // Save the matrix and vector to files
+    // ofstream Afile("A_matrix_CaseA_"+i+".dat");
+    // Afile << A << endl; // Writing matrix to file
+    // ofstream Ffile("bBoundary"+i+".dat");
+    // Ffile << bBoundary << endl; // Writing vector to file
+
+
     // Interpolating the exact solution onto the FE space:
     Vh uexaInterp;
     uexaInterp = uexa; 
-    //Solve
-    solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
-                        - int2d(Th)(fa * v) + on(1, u=ga);
-    
-
-    // Extract the stiffness matrix and F vector
-    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
-                    + on(1, u=ga);
-    matrix A = a(Vh, Vh, tgv=-2); // Stiffness matrix
-    // varf l(unused,v) = - int2d(Th)(fa * v) 
-    //                     + on(1, unused=ga);
-    // Vh F;
-    // F[] = l(0,Vh); 
-    // Save the matrix and vector to files
-    ofstream Afile("A_matrix_CaseA_"+i+".dat");
-    Afile << A << endl; // Writing matrix to file
-    // ofstream Ffile("F_vector_CaseA_"+i+".dat");
-    // Ffile << F << endl; // Writing vector to file
-
     //Compute the errors
     errL2[i] = sqrt(int2d(Th)((u - uexaInterp)^2));
     errL2Grad[i] = sqrt(int2d(Th)((dx(u) - 

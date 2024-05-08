@@ -40,16 +40,23 @@ for (i = 0; i <= m; i++) {
     Vh uexaInterp;
     uexaInterp = uexa; 
     //Solve
-    solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
-                        - int2d(Th)(fa * v) + on(1, u=ga);
+    //solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
+    //                    - int2d(Th)(fa * v) + on(1, u=ga);
     
-    // Extract the stiffness matrix and F vector
+    // Solve algebraically with symmetric stiffness matrix
     varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) 
-                    + on(1, u=ga);
-    matrix A = a(Vh, Vh, tgv=-2); // Stiffness matrix
-    // Save the matrix and vector to files
-    ofstream Afile("A_matrix_CaseA2_"+i+".dat");
-    Afile << A << endl; // Writing matrix to file
+                + int2d(Th)(fa * v) + on(1, u=ga); 
+    matrix MA = a(Vh,Vh,tgv=-1);
+    real[int] rhsA = a(0,Vh,tgv=-1.);
+
+    varf dirichletBC(u,v) = on(1, u=ga);
+    real[int] bc = dirichletBC(0,Vh,tgv=-1);
+    matrix MS = a(Vh,Vh,tgv=-2.);
+    matrix MD = MS-MA;
+    real[int] rhsS = MD*bc;
+    rhsS += rhsA;
+    u[] = MS^-1*rhsS;
+
 
     //Compute the errors
     errL2[i] = sqrt(int2d(Th)((u - uexaInterp)^2));

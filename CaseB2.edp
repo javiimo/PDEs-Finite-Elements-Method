@@ -49,13 +49,23 @@ for (i = 0; i <= m; i++) {
     solve Poisson(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
                         - int2d(Th)(fb * v) + on(1, u=gb);
     
-    // Extract the stiffness matrix and F vector
+    // Solve algebraically with symmetric stiffness matrix
     varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) 
-                    + on(1, u=gb);
-    matrix A = a(Vh, Vh, tgv=-2); // Stiffness matrix
+                + int2d(Th)(fb * v) + on(1, u=gb); 
+    matrix MA = a(Vh,Vh,tgv=-1);
+    real[int] rhsA = a(0,Vh,tgv=-1.);
+
+    varf dirichletBC(u,v) = on(1, u=gb);
+    real[int] bc = dirichletBC(0,Vh,tgv=-1);
+    matrix MS = a(Vh,Vh,tgv=-2.);
+    matrix MD = MS-MA;
+    real[int] rhsS = MD*bc;
+    rhsS += rhsA;
+    u[] = MS^-1*rhsS;
+
     // Save the matrix and vector to files
     ofstream Afile("A_matrix_CaseB2_"+i+".dat");
-    Afile << A << endl; // Writing matrix to file
+    Afile << MS << endl; // Writing matrix to file
 
 
     //Compute the errors

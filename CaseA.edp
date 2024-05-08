@@ -24,26 +24,8 @@ for (i = 0; i <= m; i++) {
     
 
     // Solve algebraically with symmetric stiffness matrix
-    // Set Dirichlet BC
-    Vh uDh = ga;
-    
-    // Set bilinear and linear forms
-    // varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v))
-    //                 + on(1, u=ga);
-    // varf l(u,v) = int2d(Th)(fa * v); 
-    // Assemble the matrix and right-hand side vector
-    // matrix A = a(Vh, Vh, tgv=-2.); // Bilinear form matrix
-    //real[int] b = l(0,Vh); // Linear form vector
-
-    // Modify b to account for the boundary conditions
-    //real[int] bBoundary = A * uDh[];
-    //b = b - bBoundary;
-    //b = bBoundary - b; //seems better
-    //b = b + bBoundary; //Maybe better?
-
-    // Segun prueba2
-    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) + int2d(Th)(fa * v) + on(1, u=ga);
-    Vh uA; // uA: Asymmetric, u:Symmetric
+    varf a(u,v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) 
+                + int2d(Th)(fa * v) + on(1, u=ga); 
     matrix MA = a(Vh,Vh,tgv=-1);
     real[int] rhsA = a(0,Vh,tgv=-1.);
 
@@ -56,16 +38,9 @@ for (i = 0; i <= m; i++) {
     u[] = MS^-1*rhsS;
 
 
-    // // Solve the system
-    // set(A, solver = UMFPACK);
-    // u[] = A^-1*b; //return solution as real[int] array
-
-
-    // // Save the matrix and vector to files
-    // ofstream Afile("A_matrix_CaseA_"+i+".dat");
-    // Afile << A << endl; // Writing matrix to file
-    // ofstream Ffile("bBoundary"+i+".dat");
-    // Ffile << bBoundary << endl; // Writing vector to file
+    // Save the matrix and vector to files
+    ofstream Afile("A_matrix_CaseA_"+i+".dat");
+    Afile << MS << endl; // Writing matrix to file
 
 
     // Interpolating the exact solution onto the FE space:

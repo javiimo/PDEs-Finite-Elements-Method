@@ -97,4 +97,4 @@ files = glob.glob('*.dat')
 # Loop through the found files and delete them
 for file in files:
     if int(file[-5])<4:
-        compute_cond_num(file, display=True)
+        compute_cond_num(file, display=0)

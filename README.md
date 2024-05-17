@@ -1,2 +1,2 @@
 # PDEs-Finite-Elements
-Using FreeFEM++ for solving an asignment for Numerical Methods for PDEs
+Using FreeFEM++ for solving PDEs with non-homogeneous Dirichlet Boundary Conditions.
